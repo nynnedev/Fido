@@ -27,6 +27,16 @@ using VirusTotalNET.Objects;
 
 namespace Fido_Main.Director.Scoring
 {
+    public class Score
+    {
+        public int Weight;
+        public int Multiplier;
+
+        public int GetScore()
+        {
+            return Weight * Multiplier;
+        }
+    }
   static class Matrix_Scoring
   {
     public static FidoReturnValues GetDetectorsScore(FidoReturnValues lFidoReturnValues)
@@ -985,24 +995,26 @@ namespace Fido_Main.Director.Scoring
 
     public static double AntiVirusScore(FidoReturnValues lFidoReturnValues)
     {
-      var iTrojanMultiplier = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.trojanmultiplier", 0);
-      var iTrojanWeight = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.trojanweight", 0);
-      var iRegularMultiplier = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.regularmultiplier", 0);
-      var iRegularWeight = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.regularweight", 0);
+      var trojan = new Score();
+      var regular = new Score();
+       trojan.Multiplier = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.trojanmultiplier", 0);
+      trojan.Weight = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.trojanweight", 0);
+      regular.Multiplier = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.regularmultiplier", 0);
+      regular.Weight = Object_Fido_Configs.GetAsInt("fido.detectors.antivirus.regularweight", 0);
       var sNewThreatName = lFidoReturnValues.Antivirus.ThreatName.Split('/');
       if ((sNewThreatName != null) && (sNewThreatName[0].ToLower() == "troj"))
       {
-        lFidoReturnValues = AntiVirusTrojanReturnScore(lFidoReturnValues, iTrojanWeight, iTrojanMultiplier, iRegularWeight, iRegularMultiplier);
+        lFidoReturnValues = AntiVirusTrojanReturnScore(lFidoReturnValues, trojan, regular);
       }
       else
       {
-        lFidoReturnValues = AntiVirusGenericReturnScore(lFidoReturnValues, iTrojanWeight, iTrojanMultiplier, iRegularWeight, iRegularMultiplier);
+        lFidoReturnValues = AntiVirusGenericReturnScore(lFidoReturnValues, trojan, regular);
       }
 
       return lFidoReturnValues.ThreatScore;
     }
 
-    private static FidoReturnValues AntiVirusGenericReturnScore(FidoReturnValues lFidoReturnValues, int iTrojanWeight, int iTrojanMultiplier, int iRegularWeight, int iRegularMultiplier)
+    private static FidoReturnValues AntiVirusGenericReturnScore(FidoReturnValues lFidoReturnValues, Score trojan, Score regular)
     {
       switch (lFidoReturnValues.Antivirus.ActionTaken.ToLower())
       {
@@ -1010,16 +1022,16 @@ namespace Fido_Main.Director.Scoring
           switch (lFidoReturnValues.Antivirus.Status.ToLower())
           {
             case "cleanable":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier;
+              lFidoReturnValues.ThreatScore += trojan.GetScore();
               break;
             case "cleanup failed":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier + 5;
+              lFidoReturnValues.ThreatScore += trojan.GetScore() + 5;
               break;
             case "restart required":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier;
+              lFidoReturnValues.ThreatScore += trojan.GetScore();
               break;
             case "not cleanable":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier + 20;
+              lFidoReturnValues.ThreatScore += trojan.GetScore() + 20;
               break;
           }
           break;
@@ -1027,16 +1039,16 @@ namespace Fido_Main.Director.Scoring
           switch (lFidoReturnValues.Antivirus.Status.ToLower())
           {
             case "cleanable":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier;
+              lFidoReturnValues.ThreatScore += regular.GetScore();
               break;
             case "cleanup failed":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier;
+              lFidoReturnValues.ThreatScore += regular.GetScore();
               break;
             case "restart required":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier - 15;
+              lFidoReturnValues.ThreatScore += regular.GetScore() - 15;
               break;
             case "not cleanable":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier + 10;
+              lFidoReturnValues.ThreatScore += regular.GetScore() + 10;
               break;
           }
           break;
@@ -1044,7 +1056,7 @@ namespace Fido_Main.Director.Scoring
       return lFidoReturnValues;
     }
 
-    private static FidoReturnValues AntiVirusTrojanReturnScore(FidoReturnValues lFidoReturnValues, int iTrojanWeight, int iTrojanMultiplier, int iRegularWeight, int iRegularMultiplier)
+    private static FidoReturnValues AntiVirusTrojanReturnScore(FidoReturnValues lFidoReturnValues, Score trojan, Score regular)
     {
       switch (lFidoReturnValues.Antivirus.ActionTaken.ToLower())
       {
@@ -1052,16 +1064,16 @@ namespace Fido_Main.Director.Scoring
           switch (lFidoReturnValues.Antivirus.Status.ToLower())
           {
             case "cleanable":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier;
+              lFidoReturnValues.ThreatScore += trojan.GetScore();
               break;
             case "cleanup failed":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier + 20;
+              lFidoReturnValues.ThreatScore += trojan.GetScore() + 20;
               break;
             case "restart required":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier - 10;
+              lFidoReturnValues.ThreatScore += trojan.GetScore() - 10;
               break;
             case "not cleanable":
-              lFidoReturnValues.ThreatScore += iTrojanWeight*iTrojanMultiplier + 40;
+              lFidoReturnValues.ThreatScore += trojan.GetScore() + 40;
               break;
           }
           break;
@@ -1069,16 +1081,16 @@ namespace Fido_Main.Director.Scoring
           switch (lFidoReturnValues.Antivirus.Status.ToLower())
           {
             case "cleanable":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier;
+              lFidoReturnValues.ThreatScore += regular.GetScore();
               break;
             case "cleanup failed":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier + 10;
+              lFidoReturnValues.ThreatScore += regular.GetScore() + 10;
               break;
             case "restart required":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier - 5;
+              lFidoReturnValues.ThreatScore += regular.GetScore() - 5;
               break;
             case "not cleanable":
-              lFidoReturnValues.ThreatScore += iRegularWeight*iRegularMultiplier + 30;
+              lFidoReturnValues.ThreatScore += regular.GetScore() + 30;
               break;
           }
           break;
