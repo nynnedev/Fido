@@ -158,52 +158,50 @@ namespace Fido_Main.Main.Detectors
       {
         using (var cyphortResponse = alertRequest.GetResponse() as HttpWebResponse)
         {
-          if (cyphortResponse != null && cyphortResponse.StatusCode == HttpStatusCode.OK)
-          {
+            if (cyphortResponse == null || cyphortResponse.StatusCode != HttpStatusCode.OK) return;
             using (var respStream = cyphortResponse.GetResponseStream())
             {
-              if (respStream == null) return;
-              var cyphortReader = new StreamReader(respStream, Encoding.UTF8);
-              var stringreturn = cyphortReader.ReadToEnd();
-              var cyphortReturn = JsonConvert.DeserializeObject<Object_Cyphort_Class.CyphortIncident>(stringreturn);
-              if (cyphortReturn.Incident != null)
-              {
-                lFidoReturnValues.Cyphort.IncidentDetails = new Object_Cyphort_Class.CyphortIncident();
-                lFidoReturnValues.Cyphort.IncidentDetails = cyphortReturn;
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name != null)
+                if (respStream == null) return;
+                var cyphortReader = new StreamReader(respStream, Encoding.UTF8);
+                var stringreturn = cyphortReader.ReadToEnd();
+                var cyphortReturn = JsonConvert.DeserializeObject<Object_Cyphort_Class.CyphortIncident>(stringreturn);
+                if (cyphortReturn.Incident != null)
                 {
-                  lFidoReturnValues.DNSName = lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name.Replace(".", "(.)");  
-                }
+                    lFidoReturnValues.Cyphort.IncidentDetails = new Object_Cyphort_Class.CyphortIncident();
+                    lFidoReturnValues.Cyphort.IncidentDetails = cyphortReturn;
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name != null)
+                    {
+                        lFidoReturnValues.DNSName = lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name.Replace(".", "(.)");  
+                    }
                 
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_exploit == "1")
-                {
-                }
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_exploit == "1")
+                    {
+                    }
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_download == "1")
-                {
-                  lFidoReturnValues = FormatDownloadReturnValues(lFidoReturnValues);
-                }
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_download == "1")
+                    {
+                        lFidoReturnValues = FormatDownloadReturnValues(lFidoReturnValues);
+                    }
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_execution == "1")
-                {
-                }
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_execution == "1")
+                    {
+                    }
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_infection == "1")
-                {
-                  lFidoReturnValues = FormatInfectionReturnValues(lFidoReturnValues);
-                }
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_infection == "1")
+                    {
+                        lFidoReturnValues = FormatInfectionReturnValues(lFidoReturnValues);
+                    }
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_data_theft == "1")
-                {
-                }
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_data_theft == "1")
+                    {
+                    }
 
-                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_file_submission == "1")
-                {
+                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_file_submission == "1")
+                    {
+                    }
                 }
-              }
             }
-          }
         }
       }
       catch (Exception e)
