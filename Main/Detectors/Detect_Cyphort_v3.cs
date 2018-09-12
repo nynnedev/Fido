@@ -165,42 +165,23 @@ namespace Fido_Main.Main.Detectors
                 var cyphortReader = new StreamReader(respStream, Encoding.UTF8);
                 var stringreturn = cyphortReader.ReadToEnd();
                 var cyphortReturn = JsonConvert.DeserializeObject<Object_Cyphort_Class.CyphortIncident>(stringreturn);
-                if (cyphortReturn.Incident != null)
+                if (cyphortReturn.Incident == null) return;
+                lFidoReturnValues.Cyphort.IncidentDetails = new Object_Cyphort_Class.CyphortIncident();
+                lFidoReturnValues.Cyphort.IncidentDetails = cyphortReturn;
+
+                ChangeDNSName(lFidoReturnValues);
+
+                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_download == "1")
                 {
-                    lFidoReturnValues.Cyphort.IncidentDetails = new Object_Cyphort_Class.CyphortIncident();
-                    lFidoReturnValues.Cyphort.IncidentDetails = cyphortReturn;
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name != null)
-                    {
-                        lFidoReturnValues.DNSName = lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name.Replace(".", "(.)");  
-                    }
-                
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_exploit == "1")
-                    {
-                    }
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_download == "1")
-                    {
-                        lFidoReturnValues = FormatDownloadReturnValues(lFidoReturnValues);
-                    }
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_execution == "1")
-                    {
-                    }
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_infection == "1")
-                    {
-                        lFidoReturnValues = FormatInfectionReturnValues(lFidoReturnValues);
-                    }
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_data_theft == "1")
-                    {
-                    }
-
-                    if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_file_submission == "1")
-                    {
-                    }
+                    lFidoReturnValues = FormatDownloadReturnValues(lFidoReturnValues);
                 }
+
+                if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_infection == "1")
+                {
+                    lFidoReturnValues = FormatInfectionReturnValues(lFidoReturnValues);
+                }
+
+                DoesNotChangeAnyThing(lFidoReturnValues);
             }
         }
       }
@@ -210,7 +191,34 @@ namespace Fido_Main.Main.Detectors
       }
     }
 
-    private static FidoReturnValues FormatDownloadReturnValues(FidoReturnValues lFidoReturnValues)
+      private static void DoesNotChangeAnyThing(FidoReturnValues lFidoReturnValues)
+      {
+          if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_exploit == "1")
+          {
+          }
+
+          if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_execution == "1")
+          {
+          }
+
+          if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_data_theft == "1")
+          {
+          }
+
+          if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Has_file_submission == "1")
+          {
+          }
+      }
+
+      private static void ChangeDNSName(FidoReturnValues lFidoReturnValues)
+      {
+          if (lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name != null)
+          {
+              lFidoReturnValues.DNSName = lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_name.Replace(".", "(.)");
+          }
+      }
+
+      private static FidoReturnValues FormatDownloadReturnValues(FidoReturnValues lFidoReturnValues)
     {
       lFidoReturnValues.Cyphort.DstIP = lFidoReturnValues.Cyphort.IncidentDetails.Incident.Source_ip;
       lFidoReturnValues.Cyphort.URL = new List<string>();
